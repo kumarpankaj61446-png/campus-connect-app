@@ -1,0 +1,17 @@
+
+{
+  "placeholderImages": [
+    {
+      "id": "hero-image",
+      "description": "A vibrant and modern classroom or learning environment.",
+      "imageUrl": "https://picsum.photos/seed/hero/1200/800",
+      "imageHint": "education classroom"
+    },
+    {
+      "id": "demo-video",
+      "description": "Placeholder for the application's demo video.",
+      "imageUrl": "https://picsum.photos/seed/demo/1024/576",
+      "imageHint": "laptop screen"
+    }
+  ]
+}
