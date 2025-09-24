@@ -1,48 +1,60 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Bot, Loader2, Sparkles, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { aiStudyBuddy } from '@/ai/flows/ai-study-buddy';
+import { useToast } from '@/hooks/use-toast';
 
 type ChatMessage = {
     role: 'user' | 'ai';
     content: string;
 };
 
-const mockResponses: Record<string, string> = {
-    "how many schools are registered?": "There are currently 4 schools registered on the platform.",
-    "what is the total monthly revenue?": "The total Monthly Recurring Revenue (MRR) across all schools is ₹2,082,500.",
-    "which school has the most students?": "Delhi Public School has the most students with 2,500 enrolled.",
-    "list all premium plan schools": "The schools on the Premium plan are: Greenwood High, Oakridge International, and Global Edge School.",
-    "default": "I can help with questions about schools, users, and revenue. For example, try asking 'How many schools are registered?' or 'What is the total revenue?'"
-};
 
 export default function AdminAIChatPage() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
-    
+    const { toast } = useToast();
+    const scrollRef = useRef<HTMLDivElement>(null);
+
+     useEffect(() => {
+        if (scrollRef.current) {
+            scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+    }, [messages, loading]);
+
     const handleSendMessage = async () => {
         if (!input.trim()) return;
 
         const userMessage: ChatMessage = { role: 'user', content: input };
         setMessages(prev => [...prev, userMessage]);
+        const currentInput = input;
         setInput('');
         setLoading(true);
         
-        // Simulate AI response
-        setTimeout(() => {
+        try {
+            const response = await aiStudyBuddy({ topic: "Platform Administration", question: currentInput });
             const aiResponse: ChatMessage = {
                 role: 'ai',
-                content: mockResponses[input.trim().toLowerCase()] || mockResponses['default']
+                content: response.answer
             };
             setMessages(prev => [...prev, aiResponse]);
+        } catch(e) {
+            toast({
+                variant: 'destructive',
+                title: 'AI Error',
+                description: 'The AI assistant failed to respond. Please try again.'
+            })
+             setMessages(prev => prev.slice(0, -1));
+        } finally {
             setLoading(false);
-        }, 1200);
+        }
     };
 
     return (
@@ -52,12 +64,12 @@ export default function AdminAIChatPage() {
                     <CardTitle className="flex items-center gap-2"><Bot /> Admin AI Assistant</CardTitle>
                     <CardDescription>Ask me anything about your platform data. I can provide information on schools, users, revenue, and more.</CardDescription>
                 </CardHeader>
-                <CardContent className="flex-1 overflow-y-auto p-6 space-y-6">
+                <CardContent ref={scrollRef} className="flex-1 overflow-y-auto p-6 space-y-6">
                     {messages.length === 0 ? (
                         <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
                             <Sparkles className="w-12 h-12 mb-4"/>
                             <p className="font-semibold">Ready to assist!</p>
-                            <p className="text-sm">Ask a question to get started.</p>
+                            <p className="text-sm">Ask a question to get started, e.g., "How many schools are registered?"</p>
                         </div>
                     ) : (
                         messages.map((message, index) => (
