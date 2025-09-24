@@ -1,0 +1,102 @@
+
+'use client';
+
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Star, TrendingUp, TrendingDown, Info } from "lucide-react";
+import { allTeacherRatings } from "@/lib/mock-data/rating-data";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, ResponsiveContainer, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
+export default function TeacherRatingsPage() {
+    const teacherId = "TCH001"; // This would be dynamic based on the logged-in user
+    const teacherData = allTeacherRatings.find(t => t.id === teacherId);
+
+    if (!teacherData) {
+        return (
+             <Card>
+                <CardHeader>
+                    <CardTitle>No Rating Data Found</CardTitle>
+                    <CardDescription>There is no rating data available for your profile yet.</CardDescription>
+                </CardHeader>
+            </Card>
+        );
+    }
+    
+    const chartData = teacherData.weeklyRatings.map((rating, index) => ({
+        name: `Week ${index + 1}`,
+        rating: rating,
+    }));
+
+    const ratingDifference = (teacherData.weeklyRatings[3] - teacherData.weeklyRatings[2]).toFixed(2);
+    const isImprovement = parseFloat(ratingDifference) >= 0;
+
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>My Weekly Ratings</CardTitle>
+                    <CardDescription>
+                        An overview of the anonymous feedback received from students for your {teacherData.subject} classes.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                     <Alert className="mb-6">
+                        <Info className="h-4 w-4"/>
+                        <AlertTitle>How Ratings Work</AlertTitle>
+                        <AlertDescription>
+                            Students can rate their teachers once per week. The chart shows your average weekly score. Your monthly average is calculated at the end of the 4th week.
+                        </AlertDescription>
+                    </Alert>
+                </CardContent>
+            </Card>
+            
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Current Monthly Average</CardTitle>
+                        <Star className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold flex items-center gap-2">
+                           {teacherData.monthlyAvg.toFixed(2)} 
+                           <span className="text-yellow-400"><Star className="fill-current"/></span>
+                        </div>
+                        <p className="text-xs text-muted-foreground">Average across all rated weeks this month</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Last Week's Change</CardTitle>
+                        {isImprovement ? <TrendingUp className="h-4 w-4 text-muted-foreground" /> : <TrendingDown className="h-4 w-4 text-muted-foreground" />}
+                    </CardHeader>
+                    <CardContent>
+                        <div className={`text-2xl font-bold ${isImprovement ? 'text-green-600' : 'text-red-600'}`}>
+                           {isImprovement ? '+' : ''}{ratingDifference}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Compared to the previous week</p>
+                    </CardContent>
+                </Card>
+            </div>
+            
+            <Card>
+                <CardHeader>
+                    <CardTitle>Weekly Performance Trend</CardTitle>
+                     <CardDescription>Your average rating for the last 4 weeks.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={chartData}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" />
+                            <YAxis domain={[0, 5]} />
+                            <RechartsTooltip contentStyle={{ background: "hsl(var(--background))", border: "1px solid hsl(var(--border))" }}/>
+                            <Legend />
+                            <Bar dataKey="rating" fill="hsl(var(--primary))" name="Average Rating" />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+
+        </div>
+    );
+}
