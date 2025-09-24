@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -56,6 +57,7 @@ function ThemeSwitcher() {
   const themes = [
     { name: 'White', value: 'light', icon: Sun },
     { name: 'Black', value: 'dark', icon: Moon },
+    { name: 'System', value: 'system', icon: Monitor },
   ];
 
   return (
