@@ -191,3 +191,4 @@ export async function sendSingleReminder(input: SingleFeeReminderInput): Promise
             message: error.message || "An unexpected error occurred while sending the reminder."
         };
     }
+}
