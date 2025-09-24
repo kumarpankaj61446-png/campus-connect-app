@@ -2,8 +2,15 @@
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [];
+  },
   /* config options here */
-  allowedDevOrigins: ["*.cloudworkstations.dev"],
+  allowedDevOrigins: [
+    "*.cloudworkstations.dev",
+    "6000-firebase-studio-1758517448147.cluster-qxqlf3vb3nbf2r42l5qfoebdry.cloudworkstations.dev",
+    "6000-firebase-studio-1758517448147.cluster-l2pczvsb5qbq2vwj5zc7pagnji.cloudworkstations.dev",
+  ],
   typescript: {
     ignoreBuildErrors: true,
   },
